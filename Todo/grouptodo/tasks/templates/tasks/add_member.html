@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Manage Members - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-7">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert" data-bs-theme="light">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card shadow-lg" data-bs-theme="light">
+            <div class="card-body p-4 p-md-5">
+
+                <h2 class="card-title text-center mb-4 text-dark">
+                <i class="bi bi-people-fill"></i> Manage Members for "{{ group.name }}"
+                </h2>
+                <p class="text-center text-muted"><small>Group Owner: {{ group.owner.username }}</small></p>
+
+                <hr>
+
+                <h4 class="text-dark mb-3"><i class="bi bi-person-plus-fill"></i> Add New Member</h4>
+                <!-- *** UPDATED URL: Added 'tasks:' namespace *** -->
+                <form method="post" action="{% url 'tasks:add_member' group.pk %}">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    {% if form.errors and not form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            Please correct the error below.
+                        </div>
+                    {% endif %}
+
+                    <div class="input-group mb-3">
+                        {{ form.username }}
+                        <button class="btn btn-success" type="submit"><i class="bi bi-plus-lg"></i> Add Member</button>
+                    </div>
+                    {% for error in form.username.errors %}
+                        <div class="invalid-feedback d-block mb-3">{{ error }}</div>
+                    {% endfor %}
+
+                </form>
+
+                <hr>
+
+                <h4 class="text-dark mb-3"><i class="bi bi-person-lines-fill"></i> Current Members</h4>
+                {% if members %}
+                    <ul class="list-group">
+                        {% for member in members %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-person"></i> {{ member.username }}
+                                </span>
+                                {% if member == group.owner %}
+                                    <span class="badge bg-primary rounded-pill">Owner</span>
+                                {% else %}
+                                    <!-- *** UPDATED URL: Added 'tasks:' namespace *** -->
+                                    <form action="{% url 'tasks:remove_member' group.pk member.pk %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to remove {{member.username}} from this group?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-person-dash-fill"></i> Remove</button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No members found.</p>
+                {% endif %}
+
+
+                <div class="text-center mt-4">
+                     <!-- *** UPDATED URL: Added 'tasks:' namespace *** -->
+                    <a href="{% url 'tasks:group_detail' group.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left-circle"></i> Back to Group Details
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

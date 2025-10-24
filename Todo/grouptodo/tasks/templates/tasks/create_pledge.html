@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block title %}Make Pledge - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="card shadow-lg" data-bs-theme="light">
+            <div class="card-body p-4 p-md-5">
+
+                <h2 class="card-title text-center mb-4 text-dark">
+                    Make Weekly Pledge
+                </h2>
+                
+                <div class="text-center">
+                    <p class="text-dark">Group: <strong>{{ group.name }}</strong></p>
+                    <p class="text-dark">Your current balance: <strong>{{ profile.coins }} Coins</strong></p>
+                </div>
+                
+                <hr class="my-4">
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Show non-field errors (e.g., not enough coins) -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.errors and not form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            Please correct the errors below.
+                        </div>
+                    {% endif %}
+
+                    <!-- Pledge Amount Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label text-dark">{{ form.amount.label }}</label>
+                        {{ form.amount }} <!-- Renders input with form-control class -->
+                        {% if form.amount.help_text %}
+                            <div class="form-text">{{ form.amount.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.amount.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
+                        <!-- Link back to group detail page -->
+                        <a href="{% url 'tasks:group_detail' group.pk %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a> 
+                        <button class="btn btn-success" type="submit">
+                            <i class="bi bi-gem"></i> Pledge Coins
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

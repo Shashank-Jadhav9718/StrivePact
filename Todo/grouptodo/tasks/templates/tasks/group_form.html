@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if is_creating %}Create Group{% else %}Edit Group{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="card shadow-lg" data-bs-theme="light">
+            <div class="card-body p-4 p-md-5">
+
+                <h2 class="card-title text-center mb-4 text-dark">
+                    {% if is_creating %}
+                        Create New Group
+                    {% else %}
+                        Edit Group: {{ form.instance.name }} {# Display name when editing #}
+                    {% endif %}
+                </h2>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Show non-field errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %} {{ error }} {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.errors and not form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            Please correct the errors below.
+                        </div>
+                    {% endif %}
+
+                    <!-- Group Name Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label text-dark">{{ form.name.label }}</label>
+                        {{ form.name }} <!-- Renders input with form-control class -->
+                        {% for error in form.name.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Group Description Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label text-dark">{{ form.description.label }}</label>
+                        {{ form.description }} <!-- Renders textarea with form-control class -->
+                        {% if form.description.help_text %}
+                            <div class="form-text">{{ form.description.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.description.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
+                        {# Link back to dashboard or group detail depending on context #}
+                        {% if not is_creating %}
+                            <!-- *** FIX: Added 'tasks:' namespace *** -->
+                            <a href="{% url 'tasks:group_detail' form.instance.pk %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        {% else %}
+                            <!-- *** FIX: Added 'tasks:' namespace *** -->
+                            <a href="{% url 'tasks:dashboard' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        {% endif %}
+                        <button class="btn btn-primary" type="submit">
+                        <i class="bi {% if is_creating %}bi-plus-lg{% else %}bi-check-lg{% endif %}"></i> {% if is_creating %}Create Group{% else %}Save Changes{% endif %}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

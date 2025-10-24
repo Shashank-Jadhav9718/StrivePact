@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block title %}Submit Proof - {{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-7">
+        
+        <div class="card shadow-lg" data-bs-theme="light">
+            <div class="card-body p-4 p-md-5">
+                
+                <h2 class="card-title text-center mb-2 text-dark">
+                    Submit Proof of Work
+                </h2>
+                <p class="text-center text-muted mb-4">For task: <strong>{{ task.title }}</strong></p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %} {{ error }} {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.errors and not form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            Please correct the errors below.
+                        </div>
+                    {% endif %}
+
+                    <!-- Proof (Text) Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.proof_text.id_for_label }}" class="form-label text-dark">{{ form.proof_text.label }}</label>
+                        {{ form.proof_text }}
+                        {% if form.proof_text.help_text %}
+                            <div class="form-text">{{ form.proof_text.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.proof_text.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Proof (Link) Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.proof_link.id_for_label }}" class="form-label text-dark">{{ form.proof_link.label }}</label>
+                        {{ form.proof_link }}
+                        {% if form.proof_link.help_text %}
+                            <div class="form-text">{{ form.proof_link.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.proof_link.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
+                        <a href="{% url 'tasks:group_detail' task.group.pk %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a> 
+                        <button class="btn btn-success" type="submit">
+                            <i class="bi bi-cloud-upload-fill"></i> Submit for Review
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

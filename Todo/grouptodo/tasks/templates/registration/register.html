@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-12 col-md-8 col-lg-6">
+        
+        <!-- Wrap the form in a light-themed card (Bootstrap 5.3+ specific) -->
+        <div class="card shadow-lg" data-bs-theme="light">
+            <div class="card-body p-4 p-md-5">
+                
+                <h2 class="card-title text-center mb-4 text-dark">
+                    Create Your Account
+                </h2>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Show non-field errors (e.g., password mismatch handled by form) -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Show general form errors if needed (less common with non_field_errors) -->
+                    {% if form.errors and not form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            Please correct the errors below.
+                        </div>
+                    {% endif %}
+
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label text-dark">{{ form.username.label }}</label>
+                        {{ form.username }} <!-- Renders input with form-control class from forms.py -->
+                        {% if form.username.help_text %}
+                            <div class="form-text">{{ form.username.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.username.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div> <!-- Show field-specific errors -->
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Email Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label text-dark">{{ form.email.label }}</label>
+                        {{ form.email }} <!-- Renders input with form-control class from forms.py -->
+                        {% if form.email.help_text %}
+                            <div class="form-text">{{ form.email.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.email.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Password Field 1 -->
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label text-dark">{{ form.password1.label }}</label>
+                        {{ form.password1 }} <!-- Renders input with form-control class from forms.py -->
+                        {% if form.password1.help_text %}
+                            <div class="form-text">{{ form.password1.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.password1.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Password Field 2 (Confirmation) -->
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label text-dark">{{ form.password2.label }}</label>
+                        {{ form.password2 }} <!-- Renders input with form-control class from forms.py -->
+                        {% if form.password2.help_text %}
+                            <div class="form-text">{{ form.password2.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in form.password2.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-primary" type="submit">Register</button>
+                    </div>
+
+                </form>
+
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="text-dark">Already have an account? 
+                        <!-- 'login' is a project-level URL, NO namespace -->
+                        <a href="{% url 'login' %}">Login Here</a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

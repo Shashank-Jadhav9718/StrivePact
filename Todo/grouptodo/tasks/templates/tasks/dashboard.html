@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main content column -->
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-light"><i class="bi bi-collection"></i> My Groups</h1>
+            <a href="{% url 'tasks:group_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create New Group</a>
+        </div>
+
+        {% if groups %}
+            <div class="list-group mb-5">
+                {% for group in groups %}
+                    <a href="{% url 'tasks:group_detail' group.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-theme="light">
+                        <div>
+                            <h5 class="mb-1">{{ group.name }}</h5>
+                            <small class="text-muted">Owner: {{ group.owner.username }}{% if group.owner == user %} (You){% endif %}</small>
+                        </div>
+                        <span class="badge bg-secondary rounded-pill">{{ group.tasks.count }} tasks</span>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert" data-bs-theme="light">
+                You are not a member of any groups yet. Why not <a href="{% url 'tasks:group_create' %}" class="alert-link">create one</a>?
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar column for Streaks & Badges -->
+    <div class="col-md-4">
+        <!-- Streak Card -->
+        <div class="card mb-4" data-bs-theme="light">
+            <div class="card-body text-center">
+                <h5 class="card-title text-dark"><i class="bi bi-fire text-danger"></i> My Streak</h5>
+                <p class="card-text display-4 text-dark mb-0">
+                    {{ user.profile.current_streak }}
+                </p>
+                <p class="card-text text-muted">
+                    {% if user.profile.current_streak == 1 %}Day{% else %}Days{% endif %}
+                </p>
+                <hr>
+                <p class="card-text text-muted mb-0">
+                    Longest Streak: {{ user.profile.longest_streak }}
+                </p>
+            </div>
+        </div>
+        
+        <!-- *** NEW: Badges Card *** -->
+        <div class="card mb-4" data-bs-theme="light">
+            <div class="card-body">
+                <h5 class="card-title text-dark"><i class="bi bi-award-fill text-primary"></i> My Badges</h5>
+                {% if user_badges %}
+                    <ul class="list-group list-group-flush">
+                        {% for badge in user_badges %}
+                            <li class="list-group-item d-flex align-items-center" title="{{ badge.description }}">
+                                <i class="bi {{ badge.icon_class }} fs-4 text-primary"></i>
+                                <span class="ms-3 text-dark fw-bold">{{ badge.name }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="card-text text-muted">No badges earned yet. Keep working!</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- *** END: Badges Card *** -->
+    </div>
+</div>
+
+
+{# Assigned Tasks Section #}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <h2 class="text-light mb-0 me-3"><i class="bi bi-person-check"></i> My Assigned Tasks</h2>
+    <div class="btn-group btn-group-sm mt-2 mt-md-0" role="group" aria-label="Task Filters">
+        <span class="text-muted me-2 align-self-center"><small>Show:</small></span>
+        <a href="?status=open"
+            class="btn {% if current_status_filter == 'open' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Open</a>
+        <a href="?status=all"
+            class="btn {% if current_status_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+        <a href="?status=completed"
+            class="btn {% if current_status_filter == 'completed' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Completed</a>
+    </div>
+</div>
+
+{% if assigned_tasks %}
+    <ul class="list-group">
+        {% for task in assigned_tasks %}
+            <li class="list-group-item d-flex justify-content-between align-items-center
+                    {% if task.is_complete %}list-group-item-secondary text-decoration-line-through{% endif %}
+                    {% if task.is_overdue %}border border-danger border-2{% endif %}"
+                data-bs-theme="light">
+                <div>
+                    <a href="{% url 'tasks:group_detail' task.group.pk %}" class="text-decoration-none text-dark fw-bold">{{ task.title }}</a>
+                    {% if task.is_overdue %}
+                        <span class="badge bg-danger ms-2">Overdue</span>
+                    {% endif %}
+                    <small class="d-block text-muted">
+                        In Group: {{ task.group.name }}
+                        {% if task.due_date %}| Due: {{ task.due_date }}{% endif %}
+                    </small>
+                </div>
+                {% if task.is_complete %}
+                    <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle-fill"></i> Completed</span>
+                {% elif task.is_overdue %}
+                    <span class="badge bg-danger rounded-pill"><i class="bi bi-exclamation-triangle-fill"></i> Overdue</span>
+                {% elif task.status == 'pending' %}
+                    <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-hourglass-split"></i> Pending Review</span>
+                {% elif task.status == 'revision' %}
+                    <span class="badge bg-danger rounded-pill"><i class="bi bi-exclamation-triangle-fill"></i> Needs Revision</span>
+                {% else %}
+                    <span class="badge bg-info rounded-pill"><i class="bi bi-play-circle-fill"></i> Open</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="alert alert-info mt-3" role="alert" data-bs-theme="light">
+    You have no tasks assigned to you matching the current filter.
+    </div>
+{% endif %}
+
+{% endblock %}
+

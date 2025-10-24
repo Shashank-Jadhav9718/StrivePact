@@ -1,0 +1,293 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 border-secondary flex-wrap">
+    <div class="mb-2 me-3">
+        <h1 class="text-light mb-0">{{ group.name }}</h1>
+        <small class="text-muted">Owner: {{ group.owner.username }}</small>
+        {% if group.description %}
+            <p class="text-secondary mt-2 mb-0">{{ group.description }}</p>
+        {% endif %}
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <!-- Pledge Button (conditional) -->
+        {% if not has_pledged %}
+            <a href="{% url 'tasks:create_pledge' group.pk %}" class="btn btn-success"><i class="bi bi-gem"></i> Make Pledge</a>
+        {% else %}
+            <span class="btn btn-outline-success disabled"><i class="bi bi-check-circle"></i> Pledged</span>
+        {% endif %}
+        
+        <a href="{% url 'tasks:task_create' group.pk %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Add Task</a>
+
+        {% if is_owner %}
+            <a href="{% url 'tasks:add_member' group.pk %}" class="btn btn-info"><i class="bi bi-person-plus"></i> Manage Members</a>
+            <a href="{% url 'tasks:group_update' group.pk %}" class="btn btn-warning"><i class="bi bi-pencil-fill"></i> Edit Group</a>
+            <a href="{% url 'tasks:group_delete' group.pk %}" class="btn btn-danger"><i class="bi bi-trash-fill"></i> Delete Group</a>
+        {% elif is_member_only %}
+            <form action="{% url 'tasks:leave_group' group.pk %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to leave this group?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-door-open-fill"></i> Leave Group</button>
+            </form>
+        {% endif %}
+
+        <a href="{% url 'tasks:dashboard' %}" class="btn btn-outline-secondary ms-md-2"><i class="bi bi-arrow-left-circle"></i> Back</a>
+    </div>
+</div>
+
+{% if is_owner %}
+<div class="card mb-4" data-bs-theme="light">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="card-title text-dark mb-0">Process Payouts</h5>
+            <p class="card-text text-muted mb-0"><small>Calculates and distributes pledges for the previous week (Mon-Sun).</small></p>
+        </div>
+        <form action="{% url 'tasks:process_payout' group.pk %}" method="post" onsubmit="return confirm('Are you sure you want to process the payout for the last week? This action cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-calculator-fill"></i> Process Last Week's Payout
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+
+{# Task Filters & Sorting #}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <h2 class="text-light mb-0 me-3"><i class="bi bi-list-task"></i> Tasks</h2>
+    <div class="d-flex flex-wrap gap-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Status Filters">
+            <span class="text-muted me-2 align-self-center"><small>Status:</small></span>
+            <a href="?status=all&assignee={{ current_assignee_filter|default:'all' }}&sort={{ current_sort_by|default:'created' }}&dir={{ current_sort_dir|default:'desc' }}"
+                class="btn {% if current_status_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+            <a href="?status=open&assignee={{ current_assignee_filter|default:'all' }}&sort={{ current_sort_by|default:'created' }}&dir={{ current_sort_dir|default:'desc' }}"
+                class="btn {% if current_status_filter == 'open' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Open</a>
+            <a href="?status=completed&assignee={{ current_assignee_filter|default:'all' }}&sort={{ current_sort_by|default:'created' }}&dir={{ current_sort_dir|default:'desc' }}"
+                class="btn {% if current_status_filter == 'completed' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Completed</a>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Assignee Filters">
+            <span class="text-muted ms-lg-3 me-2 align-self-center"><small>Assignee:</small></span>
+            <a href="?status={{ current_status_filter|default:'all' }}&assignee=all&sort={{ current_sort_by|default:'created' }}&dir={{ current_sort_dir|default:'desc' }}"
+                class="btn {% if current_assignee_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+            <a href="?status={{ current_status_filter|default:'all' }}&assignee=me&sort={{ current_sort_by|default:'created' }}&dir={{ current_sort_dir|default:'desc' }}"
+                class="btn {% if current_assignee_filter == 'me' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Me</a>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Sort Controls">
+            <span class="text-muted ms-lg-3 me-2 align-self-center"><small>Sort by:</small></span>
+            <a href="?status={{ current_status_filter|default:'all' }}&assignee={{ current_assignee_filter|default:'all' }}&sort=created&dir={% if current_sort_by == 'created' and current_sort_dir == 'desc' %}asc{% else %}desc{% endif %}"
+            class="btn {% if current_sort_by == 'created' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            Created {% if current_sort_by == 'created' %}{% if current_sort_dir == 'desc' %}<i class="bi bi-sort-down"></i>{% else %}<i class="bi bi-sort-up"></i>{% endif %}{% endif %}
+            </a>
+            <a href="?status={{ current_status_filter|default:'all' }}&assignee={{ current_assignee_filter|default:'all' }}&sort=due&dir={% if current_sort_by == 'due' and current_sort_dir == 'asc' %}desc{% else %}asc{% endif %}"
+            class="btn {% if current_sort_by == 'due' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            Due {% if current_sort_by == 'due' %}{% if current_sort_dir == 'asc' %}<i class="bi bi-sort-up"></i>{% else %}<i class="bi bi-sort-down"></i>{% endif %}{% endif %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-8">
+        {# Task List #}
+        {% if tasks %}
+            <ul class="list-group mb-4" id="task-list">
+                {% for task in tasks %}
+                    <li id="task-item-{{ task.pk }}"
+                        class="list-group-item d-flex justify-content-between align-items-center
+                            {% if task.is_complete %}list-group-item-secondary text-decoration-line-through{% endif %}
+                            {% if task.is_overdue %}border border-danger border-2{% endif %}"
+                        data-bs-theme="light"
+                        data-task-id="{{ task.pk }}">
+                        <div>
+                            <strong class="text-light">{{ task.title }}</strong>
+                            {% if task.is_overdue %}
+                                <span class="badge bg-danger ms-2">Overdue</span>
+                            {% endif %}
+                            
+                            {% if task.status == 'pending' %}
+                                {% if task.submissions.last %}
+                                <a href="{% url 'tasks:view_submission' task.submissions.last.pk %}" class="badge bg-warning text-dark ms-2 text-decoration-none">
+                                    <i class="bi bi-hourglass-split"></i> Pending Review
+                                </a>
+                                {% else %}
+                                <span class="badge bg-secondary ms-2">Error</span>
+                                {% endif %}
+                            {% elif task.status == 'revision' %}
+                                {% if task.submissions.last %}
+                                <a href="{% url 'tasks:view_submission' task.submissions.last.pk %}" class="badge bg-danger ms-2 text-decoration-none">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Needs Revision
+                                </a>
+                                {% else %}
+                                <span class="badge bg-danger ms-2">Needs Revision</span>
+                                {% endif %}
+                            {% elif task.is_complete %}
+                                {# Show nothing if complete #}
+                            {% elif not task.is_overdue %}
+                                <span class="badge bg-info ms-2">Open</span>
+                            {% endif %}
+                            
+                            {% if task.description %}
+                                <small class="d-block text-light">{{ task.description|truncatewords:15 }}</small>
+                            {% endif %}
+                            <small class="d-block text-light">
+                                Created: {{ task.created_at|date:"d M Y" }}
+                                {% if task.assigned_to %}| Assigned to: {{ task.assigned_to.username }}{% endif %}
+                                {% if task.due_date %}| Due: {{ task.due_date }}{% endif %}
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            
+                            {% if task.requires_proof %}
+                                {% if task.status == 'open' or task.status == 'revision' %}
+                                    <a href="{% url 'tasks:task_submit_proof' task.pk %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-cloud-upload"></i> {% if task.status == 'revision' %}Resubmit{% else %}Submit Proof{% endif %}
+                                    </a>
+                                {% elif task.status == 'pending' %}
+                                    {% if task.submissions.last %}
+                                    <a href="{% url 'tasks:view_submission' task.submissions.last.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-hourglass-split"></i> View Submission
+                                    </a>
+                                    {% else %}
+                                    <span class="btn btn-sm btn-outline-secondary disabled">Pending</span>
+                                    {% endif %}
+                                {% elif task.is_complete %}
+                                    <form action="{% url 'tasks:toggle_task_complete' task.pk %}" method="post" class="d-inline me-1 toggle-task-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-secondary toggle-task-button">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                        </button>
+                                    </form>
+                                {% endif %}
+        
+                            {% else %}
+                                {# Simple task: Toggle complete/undo #}
+                                <form action="{% url 'tasks:toggle_task_complete' task.pk %}" method="post" class="d-inline me-1 toggle-task-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm {% if task.is_complete %}btn-secondary{% else %}btn-success{% endif %} toggle-task-button">
+                                        {% if task.is_complete %}<i class="bi bi-arrow-counterclockwise"></i> Undo{% else %}<i class="bi bi-check-lg"></i> Done{% endif %}
+                                    </button>
+                                </form>
+                            {% endif %}
+                            
+                            {% if request.user == task.creator or is_owner %}
+                                <a href="{% url 'tasks:task_update' task.pk %}" class="btn btn-sm btn-outline-warning ms-1"><i class="bi bi-pencil"></i> Edit</a>
+                                <a href="{% url 'tasks:task_delete' task.pk %}" class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i> Delete</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info mt-3" role="alert" data-bs-theme="light">
+                There are no tasks in this group yet. Use the "Add Task" button to create one.
+            </div>
+        {% endif %}
+        <div id="task-toggle-error" class="alert alert-danger mt-3 d-none" role="alert" data-bs-theme="light">
+            Could not update task status. Please try again.
+        </div>
+    </div>
+    
+    {# --- Leaderboard & Members Column --- #}
+    <div class="col-12 col-md-4">
+        <div class="card mb-4" data-bs-theme="light">
+            <div class="card-body">
+                <h4 class="card-title text-dark"><i class="bi bi-trophy-fill text-warning"></i> Leaderboard</h4>
+                <p class="card-subtitle mb-2 text-muted"><small>Based on total points earned.</small></p>
+                <ul class="list-group list-group-flush">
+                    {% for member in leaderboard %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                {% if forloop.counter == 1 %}
+                                    <i class="bi bi-award-fill text-warning"></i>
+                                {% elif forloop.counter == 2 %}
+                                    <i class="bi bi-award-fill text-secondary"></i>
+                                {% elif forloop.counter == 3 %}
+                                    <i class="bi bi-award-fill" style="color: #cd7f32;"></i>
+                                {% else %}
+                                    <i class="bi bi-person"></i>
+                                {% endif %}
+                                {{ member.username }}
+                                {% if member == user %}(You){% endif %}
+                            </span>
+                            <span class="badge bg-primary rounded-pill">{{ member.profile.points }} Pts</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">No members found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        {# --- Members List (Moved here) --- #}
+        <h3 class="text-light mt-4 mb-3"><i class="bi bi-people-fill"></i> Members</h3>
+        <ul class="list-group mb-4">
+            {% for member in members %}
+                <li class="list-group-item" data-bs-theme="light">
+                    {{member.username}}{% if member == group.owner %} (Owner){% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item" data-bs-theme="light">No members found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const taskList = document.getElementById('task-list');
+    const errorAlert = document.getElementById('task-toggle-error');
+
+    if (taskList) {
+        taskList.addEventListener('submit', function(event) {
+            if (event.target.classList.contains('toggle-task-form')) {
+                event.preventDefault();
+                errorAlert.classList.add('d-none');
+
+                const form = event.target;
+                const url = form.action;
+                const listItem = form.closest('li');
+                const taskId = listItem.dataset.taskId;
+                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+                const button = form.querySelector('.toggle-task-button');
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) { 
+                        return response.json().then(errData => {
+                            throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                        }).catch(() => {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.task_id == taskId) {
+                        window.location.reload(); 
+                    } else {
+                            throw new Error(data.error || 'Failed to update task status.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error toggling task:', error);
+                    errorAlert.textContent = `Error: ${error.message || 'Could not update task status. Please try again.'}`;
+                    errorAlert.classList.remove('d-none');
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

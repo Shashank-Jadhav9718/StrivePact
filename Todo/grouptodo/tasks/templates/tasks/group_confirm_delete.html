@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-lg" data-bs-theme="light">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="card-title text-center mb-4 text-dark">Confirm Deletion</h2>
+                
+                <p class="text-center text-dark">Are you sure you want to delete the group "<strong>{{ group.name }}</strong>"?</p>
+                <p class="text-center text-danger"><small>This action cannot be undone, and all associated tasks will also be deleted.</small></p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
+                        <!-- *** Uses 'tasks:' namespace *** -->
+                        <a href="{% url 'tasks:group_detail' group.pk %}" class="btn btn-secondary">Cancel</a> 
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i> Yes, Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

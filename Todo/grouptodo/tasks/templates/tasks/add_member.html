@@ -8,14 +8,14 @@
 
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert" data-bs-theme="light">
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
 
-        <div class="card shadow-lg" data-bs-theme="light">
+        <div class="card shadow-lg">
             <div class="card-body p-4 p-md-5">
 
                 <h2 class="card-title text-center mb-4 text-dark">

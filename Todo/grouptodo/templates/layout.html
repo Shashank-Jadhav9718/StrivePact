@@ -17,34 +17,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-    <title>{% block title %}Group Todo App{% endblock %}</title>
+    <title>{% block title %}StrivePact{% endblock %}</title>
     
-    <style>
-        body {
-            font-family: 'Inter', sans-serif; /* Apply the font */
-            padding-top: 56px; /* Adjust body padding if using fixed-top navbar */
-        }
-        .container {
-            max-width: 960px; 
-        }
-        .bi {
-            vertical-align: -.125em;
-            margin-right: 0.25rem;
-        }
-        .btn .bi, .nav-link .bi {
-            margin-right: 0.35rem;
-        }
-        .navbar-text .bi {
-            margin-right: 0.35rem;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body class="bg-dark text-light"> 
+<body> 
     
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary fixed-top mb-4">
+    <nav class="navbar navbar-expand-lg fixed-top mb-4">
         <div class="container-fluid container">
-        <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'tasks:dashboard' %}{% else %}{% url 'login' %}{% endif %}"><i class="bi bi-check2-square"></i> Group Tasks</a>
+        <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'tasks:dashboard' %}{% else %}{% url 'login' %}{% endif %}"><i class="bi bi-rocket-takeoff"></i> StrivePact</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -101,7 +83,7 @@
         {% if messages %}
             <div class="messages mb-3">
                 {% for message in messages %}
-                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert" data-bs-theme="light">
+                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>

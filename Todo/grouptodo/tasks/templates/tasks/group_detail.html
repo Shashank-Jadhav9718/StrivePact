@@ -37,7 +37,7 @@
 </div>
 
 {% if is_owner %}
-<div class="card mb-4" data-bs-theme="light">
+<div class="card mb-4">
     <div class="card-body d-flex justify-content-between align-items-center">
         <div>
             <h5 class="card-title text-dark mb-0">Process Payouts</h5>
@@ -98,7 +98,7 @@
                         class="list-group-item d-flex justify-content-between align-items-center
                             {% if task.is_complete %}list-group-item-secondary text-decoration-line-through{% endif %}
                             {% if task.is_overdue %}border border-danger border-2{% endif %}"
-                        data-bs-theme="light"
+                       
                         data-task-id="{{ task.pk }}">
                         <div>
                             <strong class="text-light">{{ task.title }}</strong>
@@ -180,18 +180,18 @@
                 {% endfor %}
             </ul>
         {% else %}
-            <div class="alert alert-info mt-3" role="alert" data-bs-theme="light">
+            <div class="alert alert-info mt-3" role="alert">
                 There are no tasks in this group yet. Use the "Add Task" button to create one.
             </div>
         {% endif %}
-        <div id="task-toggle-error" class="alert alert-danger mt-3 d-none" role="alert" data-bs-theme="light">
+        <div id="task-toggle-error" class="alert alert-danger mt-3 d-none" role="alert">
             Could not update task status. Please try again.
         </div>
     </div>
     
     {# --- Leaderboard & Members Column --- #}
     <div class="col-12 col-md-4">
-        <div class="card mb-4" data-bs-theme="light">
+        <div class="card mb-4">
             <div class="card-body">
                 <h4 class="card-title text-dark"><i class="bi bi-trophy-fill text-warning"></i> Leaderboard</h4>
                 <p class="card-subtitle mb-2 text-muted"><small>Based on total points earned.</small></p>
@@ -224,11 +224,11 @@
         <h3 class="text-light mt-4 mb-3"><i class="bi bi-people-fill"></i> Members</h3>
         <ul class="list-group mb-4">
             {% for member in members %}
-                <li class="list-group-item" data-bs-theme="light">
+                <li class="list-group-item">
                     {{member.username}}{% if member == group.owner %} (Owner){% endif %}
                 </li>
             {% empty %}
-                <li class="list-group-item" data-bs-theme="light">No members found.</li>
+                <li class="list-group-item">No members found.</li>
             {% endfor %}
         </ul>
     </div>

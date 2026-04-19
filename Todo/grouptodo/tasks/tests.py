@@ -447,7 +447,7 @@ class MemberManagementViewTests(TestCase):
         self.assertRedirects(response, add_member_url)
         self.group.refresh_from_db()
         self.assertIn(self.member2, self.group.members.all())
-        self.assertContains(response, "User 'member2' added successfully.")
+        self.assertContains(response, "User &#x27;member2&#x27; added successfully.")
         
     def test_add_member_owner_post_already_member(self):
         add_member_url = reverse('tasks:add_member', kwargs={'group_pk': self.group.pk})
@@ -498,7 +498,7 @@ class MemberManagementViewTests(TestCase):
         self.assertRedirects(response, add_member_url)
         self.group.refresh_from_db()
         self.assertNotIn(self.member1, self.group.members.all())
-        self.assertContains(response, f"User '{self.member1.username}' removed successfully.")
+        self.assertContains(response, f"User &#x27;{self.member1.username}&#x27; removed successfully.")
 
     def test_leave_group_requires_login(self):
         self.client.logout()
@@ -511,7 +511,7 @@ class MemberManagementViewTests(TestCase):
     def test_leave_group_non_member_redirects(self):
         leave_url = reverse('tasks:leave_group', kwargs={'group_pk': self.group.pk})
         dashboard_url = reverse('tasks:dashboard')
-        self.client.login(username='nonmember', password='password123')
+        self.client.login(username='membernonmember', password='password123')
         response = self.client.post(leave_url, follow=True)
         self.assertRedirects(response, dashboard_url)
         messages = list(response.context['messages'])
